@@ -24,6 +24,15 @@
         </div>
       </div>
      </section>
+     <section class="row justify-content-center" v-if="restaurant">
+      <div class="col-md-10 fs-2 fw-bold text-success border-bottom border-success mb-2">
+        Current Reports for {{ restaurant.name }}
+      </div>
+      <!-- {{ reports }} -->
+      <div v-for="report in reports" :key="report.id"  class="col-md-10">
+        <ReportCard :report="report"/>
+      </div>
+     </section>
   </div>
 </template>
 
@@ -34,10 +43,13 @@ import { AppState } from '../AppState';
 import { computed, ref, onMounted } from 'vue';
 import Pop from '../utils/Pop.js';
 import { restaurantsService } from '../services/RestaurantsService.js';
+import {reportsService} from '../services/ReportsService.js'
+import ReportCard from '../components/ReportCard.vue'
 export default {
   setup(){
     onMounted(()=>{
       getRestaurantById()
+      getRestaurantReports()
     })
     const route = useRoute()
     const router = useRouter()
@@ -49,10 +61,19 @@ export default {
         router.push({name: 'Home'})
       }
     }
+    async function getRestaurantReports(){
+      try {
+        await reportsService.getRestaurantReports(route.params.restaurantId)
+      } catch (error) {
+        Pop.error(error, '[GET REPORTS]')
+      }
+    }
   return {
-    restaurant: computed(()=> AppState.activeRestaurant)
+    restaurant: computed(()=> AppState.activeRestaurant),
+    reports: computed(()=> AppState.reports)
    }
-  }
+  },
+  components: {ReportCard}
 };
 </script>
 
