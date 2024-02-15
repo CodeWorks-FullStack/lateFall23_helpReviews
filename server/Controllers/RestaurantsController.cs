@@ -7,12 +7,15 @@ public class RestaurantsController : ControllerBase
 {
   private readonly RestaurantsService restaurantsService;
 
+  private readonly ReportsService reportsService;
+
   private readonly Auth0Provider auth;
 
-    public RestaurantsController(Auth0Provider auth, RestaurantsService restaurantsService)
+    public RestaurantsController(Auth0Provider auth, RestaurantsService restaurantsService, ReportsService reportsService)
     {
         this.auth = auth;
         this.restaurantsService = restaurantsService;
+        this.reportsService = reportsService;
     }
 
     [HttpGet]
@@ -40,9 +43,25 @@ public class RestaurantsController : ControllerBase
     {
       Account userInfo = await auth.GetUserInfoAsync<Account>(HttpContext);
       Restaurant restaurant = restaurantsService.GetRestaurantById(restaurantId, userInfo?.Id);
+      restaurant = restaurantsService.IncreaseVisits(restaurant);
       return Ok(restaurant);
     }
     catch (Exception error)
+    {
+      return BadRequest(error.Message);
+    }
+  }
+
+  [HttpGet("{restaurantId}/reports")]
+  public async Task<ActionResult<List<Report>>> GetRestaurantReports(int restaurantId)
+  {
+    try
+    {
+    Account userInfo = await auth.GetUserInfoAsync<Account>(HttpContext);
+    List<Report> reports = reportsService.GetRestaurantReports(restaurantId, userInfo?.Id);
+    return Ok(reports);
+    }
+   catch (Exception error)
     {
       return BadRequest(error.Message);
     }

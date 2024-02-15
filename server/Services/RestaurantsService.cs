@@ -22,10 +22,23 @@ public class RestaurantsService(RestaurantsRepository repo)
       Restaurant restaurant = repo.GetRestaurantById(restaurantId);
       if(restaurant == null) throw new Exception($"☹️No restaurant At that id: {restaurantId}");
       if(restaurant.Shutdown == true && restaurant.OwnerId != userId) throw new Exception($"Sorry this restaurant is shutdown, check back later");
+      return restaurant;
+    }
+
+    internal Restaurant IncreaseVisits( int restaurantId){
+      Restaurant restaurant = repo.GetRestaurantById(restaurantId);
       // REVIEW adding to the restaurants visit count when we get it
       restaurant.VisitCount++;
       repo.UpdateRestaurant(restaurant);
+      return restaurant;
+    }
 
+    // NOTE a function with the same name, but different parameters is an overload, when you invoke this method, the version it runs will be determined by your argument input.
+    internal Restaurant IncreaseVisits(Restaurant restaurant)
+    {
+      // REVIEW adding to the restaurants visit count when we get it
+      restaurant.VisitCount++;
+      repo.UpdateRestaurant(restaurant);
       return restaurant;
     }
 }
